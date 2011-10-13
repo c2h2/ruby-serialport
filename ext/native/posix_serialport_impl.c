@@ -71,6 +71,7 @@ VALUE sp_create_impl(class, _port)
    char *port;
    char *ports[] = {
 #if defined(OS_LINUX) || defined(OS_CYGWIN)
+      "/dev/ttyUSB0", "/dev/ttyUSB1", "/dev/ttyUSB2", "/dev/ttyUSB3",
       "/dev/ttyS0", "/dev/ttyS1", "/dev/ttyS2", "/dev/ttyS3",
       "/dev/ttyS4", "/dev/ttyS5", "/dev/ttyS6", "/dev/ttyS7"
 #elif defined(OS_FREEBSD) || defined(OS_NETBSD) || defined(OS_OPENBSD) || defined(OS_DARWIN)
@@ -143,7 +144,7 @@ VALUE sp_create_impl(class, _port)
    params.c_oflag = 0;
    params.c_lflag = 0;
    params.c_iflag &= (IXON | IXOFF | IXANY);
-   params.c_cflag |= CLOCAL | CREAD;
+   params.c_cflag |= CLOCAL | CREAD | CMSPAR;
    params.c_cflag &= ~HUPCL;
 
    if (tcsetattr(fd, TCSANOW, &params) == -1)
@@ -328,7 +329,19 @@ VALUE sp_set_modem_params_impl(argc, argv, self)
          params.c_cflag |= PARENB;
          params.c_cflag |= PARODD;
          break;
+/*
+      case SPACE:
+         params.c_cflag |= CMSPAR;
+         params.c_cflag |= PARENB;
+         params.c_cflag &= ~PARODD;
+         break; 
 
+      case MARK:
+         params.c_cflag |= CMSPAR;
+         params.c_cflag |= PARENB;
+         params.c_cflag |= PARODD;
+         break;
+*/
       case NONE:
          params.c_cflag &= ~PARENB;
          break;
@@ -686,3 +699,4 @@ VALUE sp_get_dtr_impl(self)
 }
 
 #endif /* !defined(OS_MSWIN) && !defined(OS_BCCWIN) && !defined(OS_MINGW) */
+
